@@ -66,7 +66,7 @@ const ChocolateGame = () => {
           id: Date.now() + Math.random(),
           x: 10 + Math.random() * 80,
           y: -10,
-          speed: 1.5 + Math.random() * 2,
+          speed: 0.6 + Math.random() * 0.8,
           emoji: CHOCOLATES[Math.floor(Math.random() * CHOCOLATES.length)],
           rotation: Math.random() * 360,
         };

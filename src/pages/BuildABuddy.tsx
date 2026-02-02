@@ -45,14 +45,15 @@ const BuildABuddy = () => {
       <main className="pt-24 pb-8 px-4 flex flex-col items-center">
         {/* Bear Display */}
         <motion.div
-          className="relative w-64 h-72 mb-8"
+          className="relative w-72 h-80 mb-8 flex items-center justify-center"
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
         >
-          {/* Crown */}
+          {/* Crown - positioned at top of bear's head */}
           {accessories.crown && (
             <motion.div
-              className="absolute -top-4 left-1/2 -translate-x-1/2 text-5xl z-10"
+              className="absolute text-4xl z-20"
+              style={{ top: '8px', left: '50%', transform: 'translateX(-50%)' }}
               initial={{ y: -20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
             >
@@ -60,10 +61,11 @@ const BuildABuddy = () => {
             </motion.div>
           )}
 
-          {/* Hat */}
+          {/* Hat - positioned at top of bear's head (only if no crown) */}
           {accessories.hat && !accessories.crown && (
             <motion.div
-              className="absolute -top-2 left-1/2 -translate-x-1/2 text-5xl z-10"
+              className="absolute text-4xl z-20"
+              style={{ top: '12px', left: '50%', transform: 'translateX(-50%)' }}
               initial={{ y: -20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
             >
@@ -72,14 +74,15 @@ const BuildABuddy = () => {
           )}
 
           {/* Bear Base */}
-          <div className="text-[12rem] leading-none text-center select-none">
+          <div className="text-[10rem] leading-none select-none">
             🧸
           </div>
 
-          {/* Glasses */}
+          {/* Glasses - positioned on bear's face */}
           {accessories.glasses && (
             <motion.div
-              className="absolute top-[85px] left-1/2 -translate-x-1/2 text-4xl"
+              className="absolute text-3xl z-10"
+              style={{ top: '72px', left: '50%', transform: 'translateX(-50%)' }}
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
             >
@@ -87,26 +90,29 @@ const BuildABuddy = () => {
             </motion.div>
           )}
 
-          {/* Blush */}
+          {/* Blush - cheeks on both sides */}
           {accessories.blush && (
             <>
               <motion.div
-                className="absolute top-[115px] left-[60px] w-6 h-4 rounded-full bg-pink-300/60"
+                className="absolute w-5 h-3 rounded-full bg-pink-300/70 z-10"
+                style={{ top: '95px', left: '72px' }}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
               />
               <motion.div
-                className="absolute top-[115px] right-[60px] w-6 h-4 rounded-full bg-pink-300/60"
+                className="absolute w-5 h-3 rounded-full bg-pink-300/70 z-10"
+                style={{ top: '95px', right: '72px' }}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
               />
             </>
           )}
 
-          {/* Bowtie */}
+          {/* Bowtie - positioned at bear's neck */}
           {accessories.bowtie && (
             <motion.div
-              className="absolute top-[170px] left-1/2 -translate-x-1/2 text-3xl"
+              className="absolute text-2xl z-10"
+              style={{ top: '145px', left: '50%', transform: 'translateX(-50%)' }}
               initial={{ scale: 0, rotate: -20 }}
               animate={{ scale: 1, rotate: 0 }}
             >

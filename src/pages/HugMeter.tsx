@@ -20,14 +20,17 @@ const HugMeter = () => {
     }
   };
 
-  // Calculate positions
-  const leftPos = 50 - (value / 100) * 35;
-  const rightPos = 50 + (value / 100) * 35;
+  // Calculate positions - start far apart (15% and 85%), come together at center
+  const leftPos = 15 + (value / 100) * 35; // 15% -> 50%
+  const rightPos = 85 - (value / 100) * 35; // 85% -> 50%
+  
+  // At 100%, they should overlap in a hug
+  const isHugging = value === 100;
 
   return (
     <div 
       className={`min-h-screen bg-gradient-to-b from-background via-rose-light/30 to-background relative overflow-hidden transition-transform duration-100 ${
-        value === 100 ? 'animate-shake' : ''
+        isHugging ? 'animate-shake' : ''
       }`}
     >
       <NavigationMenu />
@@ -40,53 +43,73 @@ const HugMeter = () => {
       <Confetti trigger={showConfetti} onComplete={() => setShowConfetti(false)} />
 
       <main className="pt-24 pb-8 px-4 flex flex-col items-center justify-center min-h-screen">
-        {/* Avatars */}
-        <div className="relative w-full max-w-sm h-48 mb-8">
-          {/* Left Avatar */}
+        {/* Character Display */}
+        <div className="relative w-full max-w-sm h-64 mb-8">
+          {/* Mikuu (Girl) - Left side */}
           <motion.div
-            className="absolute text-7xl"
+            className="absolute flex flex-col items-center"
             style={{ left: `${leftPos}%`, top: '50%' }}
             animate={{
               x: '-50%',
               y: '-50%',
-              scale: value === 100 ? 1.1 : 1,
+              scale: isHugging ? 1.15 : 1,
+              rotate: isHugging ? -10 : 0,
             }}
             transition={{ type: 'spring', stiffness: 200, damping: 20 }}
           >
-            👩
+            <span className="text-6xl">{isHugging ? '🤗' : '👩'}</span>
+            <span className="mt-2 text-sm font-medium text-primary bg-primary/10 px-3 py-1 rounded-full">
+              Mikuu
+            </span>
           </motion.div>
 
-          {/* Right Avatar */}
+          {/* Chakudi (Boy) - Right side */}
           <motion.div
-            className="absolute text-7xl"
+            className="absolute flex flex-col items-center"
             style={{ left: `${rightPos}%`, top: '50%' }}
             animate={{
               x: '-50%',
               y: '-50%',
-              scale: value === 100 ? 1.1 : 1,
+              scale: isHugging ? 1.15 : 1,
+              rotate: isHugging ? 10 : 0,
             }}
             transition={{ type: 'spring', stiffness: 200, damping: 20 }}
           >
-            👨
+            <span className="text-6xl">{isHugging ? '🤗' : '👨'}</span>
+            <span className="mt-2 text-sm font-medium text-primary bg-primary/10 px-3 py-1 rounded-full">
+              Chakudi
+            </span>
           </motion.div>
 
-          {/* Hearts when at max */}
-          {value === 100 && (
+          {/* Heart between them when hugging */}
+          {isHugging && (
+            <motion.div
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-5xl z-10"
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 15 }}
+            >
+              ❤️
+            </motion.div>
+          )}
+
+          {/* Hearts floating up when hugging */}
+          {isHugging && (
             <>
-              {[...Array(5)].map((_, i) => (
+              {[...Array(7)].map((_, i) => (
                 <motion.div
                   key={i}
-                  className="absolute left-1/2 top-1/4 text-2xl"
+                  className="absolute left-1/2 top-1/3 text-2xl"
                   initial={{ opacity: 0, y: 0, x: '-50%' }}
                   animate={{
                     opacity: [0, 1, 0],
-                    y: -60,
-                    x: `calc(-50% + ${(i - 2) * 20}px)`,
+                    y: -80,
+                    x: `calc(-50% + ${(i - 3) * 25}px)`,
                   }}
                   transition={{
-                    duration: 1.5,
+                    duration: 1.8,
                     repeat: Infinity,
-                    delay: i * 0.2,
+                    delay: i * 0.25,
                   }}
                 >
                   💕
@@ -94,9 +117,23 @@ const HugMeter = () => {
               ))}
             </>
           )}
+
+          {/* Connection line showing them getting closer */}
+          {!isHugging && value > 0 && (
+            <motion.div
+              className="absolute top-1/2 h-1 bg-gradient-to-r from-pink-300 via-rose-400 to-pink-300 rounded-full"
+              style={{
+                left: `${leftPos + 5}%`,
+                width: `${rightPos - leftPos - 10}%`,
+                transform: 'translateY(-50%)',
+              }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.5 }}
+            />
+          )}
         </div>
 
-        {/* Slider */}
+        {/* Slider Card */}
         <motion.div
           className="glass-card rounded-3xl p-6 w-full max-w-sm"
           initial={{ opacity: 0, y: 20 }}
@@ -124,7 +161,7 @@ const HugMeter = () => {
             <span>🤗 MEGA HUG</span>
           </div>
 
-          {value === 100 && (
+          {isHugging && (
             <motion.div
               className="mt-6 text-center"
               initial={{ opacity: 0, scale: 0.8 }}
@@ -132,7 +169,7 @@ const HugMeter = () => {
             >
               <p className="text-primary font-semibold flex items-center justify-center gap-2">
                 <Heart className="w-5 h-5 fill-current" />
-                Maximum Hug Power Achieved!
+                Mikuu & Chakudi are hugging!
                 <Heart className="w-5 h-5 fill-current" />
               </p>
             </motion.div>
@@ -145,7 +182,7 @@ const HugMeter = () => {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
         >
-          Slide to bring two hearts together! 💕
+          Slide to bring Mikuu & Chakudi together! 💕
         </motion.p>
       </main>
     </div>

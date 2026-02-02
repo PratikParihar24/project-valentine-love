@@ -1,210 +1,249 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { NavigationMenu } from '@/components/NavigationMenu';
 import { PageHeader } from '@/components/PageHeader';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Heart } from 'lucide-react';
+import { Confetti } from '@/components/Confetti';
 
-interface KissMark {
-  id: number;
-  x: number;
-  y: number;
-  rotation: number;
-  scale: number;
-  color: string;
+type KissType = 'peck' | 'cheek' | 'forehead' | 'butterfly' | 'eskimo';
+
+interface KissConfig {
+  id: KissType;
+  label: string;
+  emoji: string;
+  description: string;
+  girlEmoji: string;
+  boyEmoji: string;
+  kissEmoji: string;
 }
 
-const KISS_COLORS = [
-  'hsl(347, 77%, 62%)', // rose
-  'hsl(340, 82%, 52%)', // pink
-  'hsl(0, 78%, 62%)', // red
-  'hsl(350, 70%, 55%)', // crimson
-  'hsl(330, 75%, 60%)', // magenta
+const KISS_TYPES: KissConfig[] = [
+  { id: 'peck', label: 'Quick Peck', emoji: '💋', description: 'A sweet quick kiss', girlEmoji: '😗', boyEmoji: '😙', kissEmoji: '💋' },
+  { id: 'cheek', label: 'Cheek Kiss', emoji: '😘', description: 'A gentle kiss on the cheek', girlEmoji: '😚', boyEmoji: '☺️', kissEmoji: '💕' },
+  { id: 'forehead', label: 'Forehead Kiss', emoji: '🥰', description: 'A caring forehead kiss', girlEmoji: '🥰', boyEmoji: '😌', kissEmoji: '💗' },
+  { id: 'butterfly', label: 'Butterfly Kiss', emoji: '🦋', description: 'Eyelashes fluttering', girlEmoji: '😊', boyEmoji: '😊', kissEmoji: '🦋' },
+  { id: 'eskimo', label: 'Eskimo Kiss', emoji: '👃', description: 'Nose to nose rub', girlEmoji: '🤭', boyEmoji: '😄', kissEmoji: '💖' },
 ];
 
 const KissWall = () => {
-  const [kisses, setKisses] = useState<KissMark[]>([]);
+  const [selectedKiss, setSelectedKiss] = useState<KissType>('peck');
+  const [isKissing, setIsKissing] = useState(false);
+  const [kissCount, setKissCount] = useState(0);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [floatingHearts, setFloatingHearts] = useState<{ id: number; x: number }[]>([]);
 
-  const handleTap = useCallback((e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
-    let x: number, y: number;
+  const currentKiss = KISS_TYPES.find(k => k.id === selectedKiss)!;
 
-    if ('touches' in e) {
-      const touch = e.touches[0];
-      const rect = e.currentTarget.getBoundingClientRect();
-      x = touch.clientX - rect.left;
-      y = touch.clientY - rect.top;
-    } else {
-      const rect = e.currentTarget.getBoundingClientRect();
-      x = e.clientX - rect.left;
-      y = e.clientY - rect.top;
+  const handleKiss = () => {
+    if (isKissing) return;
+    
+    setIsKissing(true);
+    setKissCount(prev => prev + 1);
+    
+    // Add floating hearts
+    const newHearts = Array.from({ length: 5 }, (_, i) => ({
+      id: Date.now() + i,
+      x: Math.random() * 60 - 30,
+    }));
+    setFloatingHearts(prev => [...prev, ...newHearts]);
+    
+    // Show confetti every 5 kisses
+    if ((kissCount + 1) % 5 === 0) {
+      setShowConfetti(true);
     }
-
-    const newKiss: KissMark = {
-      id: Date.now() + Math.random(),
-      x,
-      y,
-      rotation: Math.random() * 40 - 20,
-      scale: 0.8 + Math.random() * 0.4,
-      color: KISS_COLORS[Math.floor(Math.random() * KISS_COLORS.length)],
-    };
-
-    setKisses(prev => [...prev, newKiss]);
-  }, []);
-
-  // Simulate gravity - kisses fall slowly
-  const [fallingKisses, setFallingKisses] = useState<KissMark[]>([]);
-
-  const handleKissFall = useCallback((kiss: KissMark) => {
-    // Move to falling array with new position
-    setKisses(prev => prev.filter(k => k.id !== kiss.id));
     
-    const bottomY = window.innerHeight - 100 - Math.random() * 50;
-    const fallenKiss = {
-      ...kiss,
-      y: bottomY,
-      x: kiss.x + (Math.random() * 40 - 20),
-    };
+    setTimeout(() => {
+      setIsKissing(false);
+    }, 1500);
     
-    setFallingKisses(prev => [...prev.slice(-30), fallenKiss]);
-  }, []);
-
-  const clearKisses = () => {
-    setKisses([]);
-    setFallingKisses([]);
+    // Clean up old hearts
+    setTimeout(() => {
+      setFloatingHearts(prev => prev.filter(h => !newHearts.find(nh => nh.id === h.id)));
+    }, 2000);
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-rose-light/30 to-background relative overflow-hidden">
       <NavigationMenu />
       <PageHeader
-        title="The Kiss Wall"
+        title="Kiss Day"
         subtitle="Kiss Day • Feb 13"
         icon={<Sparkles className="w-5 h-5 text-primary" />}
       />
 
-      {/* Canvas */}
-      <div
-        className="fixed inset-0 pt-20 cursor-crosshair"
-        onClick={handleTap}
-        onTouchStart={handleTap}
-      >
-        {/* Fallen Kisses at bottom */}
-        <AnimatePresence>
-          {fallingKisses.map((kiss) => (
-            <motion.div
-              key={`fallen-${kiss.id}`}
-              className="absolute pointer-events-none select-none"
-              style={{
-                left: kiss.x,
-                top: kiss.y,
-                transform: 'translate(-50%, -50%)',
-                color: kiss.color,
-              }}
-              initial={{ opacity: 0.8 }}
-              animate={{ opacity: 0.6 }}
-            >
-              <span 
-                className="text-3xl" 
-                style={{ 
-                  transform: `scale(${kiss.scale}) rotate(${kiss.rotation}deg)`,
-                  display: 'inline-block',
-                }}
-              >
-                💋
-              </span>
-            </motion.div>
-          ))}
-        </AnimatePresence>
+      <Confetti trigger={showConfetti} onComplete={() => setShowConfetti(false)} />
 
-        {/* Active Kisses */}
-        <AnimatePresence>
-          {kisses.map((kiss) => (
-            <motion.div
-              key={kiss.id}
-              className="absolute pointer-events-none select-none"
-              style={{
-                left: kiss.x,
-                transform: 'translate(-50%, -50%)',
-                color: kiss.color,
-              }}
-              initial={{ 
-                y: kiss.y, 
-                scale: 0, 
-                opacity: 0,
-                rotate: kiss.rotation - 20,
-              }}
-              animate={{ 
-                y: kiss.y + 100,
-                scale: kiss.scale, 
-                opacity: 1,
-                rotate: kiss.rotation,
-              }}
-              transition={{
-                type: 'spring',
-                stiffness: 100,
-                damping: 10,
-              }}
-              onAnimationComplete={() => handleKissFall(kiss)}
-            >
-              <span 
-                className="text-4xl drop-shadow-lg"
-                style={{ display: 'inline-block' }}
-              >
-                💋
-              </span>
-            </motion.div>
-          ))}
-        </AnimatePresence>
-
-        {/* Instructions */}
-        {kisses.length === 0 && fallingKisses.length === 0 && (
+      <main className="pt-24 pb-8 px-4 flex flex-col items-center">
+        {/* Characters Display */}
+        <motion.div
+          className="relative w-full max-w-sm h-56 mb-6 flex items-center justify-center"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          {/* Mikuu (Girl) */}
           <motion.div
-            className="absolute inset-0 flex items-center justify-center pointer-events-none"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-          >
-            <div className="glass-card rounded-3xl px-8 py-6 text-center max-w-xs mx-4">
-              <Sparkles className="w-12 h-12 text-primary mx-auto mb-4" />
-              <h2 className="font-serif text-xl font-semibold text-foreground mb-2">
-                Tap to Kiss
-              </h2>
-              <p className="text-muted-foreground text-sm">
-                Watch them fall and pile up at the bottom! 💋
-              </p>
-            </div>
-          </motion.div>
-        )}
-      </div>
-
-      {/* Counter & Clear */}
-      <motion.div
-        className="fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-4"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-      >
-        <div className="glass-card rounded-full px-6 py-3 flex items-center gap-3">
-          <span className="text-2xl">💋</span>
-          <span className="font-semibold text-foreground">{kisses.length + fallingKisses.length}</span>
-          <span className="text-muted-foreground text-sm">kisses</span>
-        </div>
-
-        {(kisses.length > 0 || fallingKisses.length > 0) && (
-          <motion.button
-            className="glass-card rounded-full px-4 py-3 text-muted-foreground hover:text-foreground transition-colors"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={(e) => {
-              e.stopPropagation();
-              clearKisses();
+            className="absolute flex flex-col items-center"
+            style={{ left: '25%' }}
+            animate={{
+              x: isKissing ? 30 : 0,
+              scale: isKissing ? 1.1 : 1,
             }}
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
           >
-            Clear
-          </motion.button>
-        )}
-      </motion.div>
+            <motion.span 
+              className="text-6xl"
+              animate={{ rotate: isKissing ? 10 : 0 }}
+            >
+              {isKissing ? currentKiss.girlEmoji : '👩'}
+            </motion.span>
+            <span className="mt-2 text-sm font-medium text-primary bg-primary/10 px-3 py-1 rounded-full">
+              Mikuu
+            </span>
+          </motion.div>
+
+          {/* Kiss Effect in center */}
+          <AnimatePresence>
+            {isKissing && (
+              <motion.div
+                className="absolute left-1/2 top-1/3 -translate-x-1/2 text-4xl z-20"
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: [0, 1.5, 1], opacity: 1 }}
+                exit={{ scale: 0, opacity: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                {currentKiss.kissEmoji}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Floating Hearts */}
+          <AnimatePresence>
+            {floatingHearts.map((heart) => (
+              <motion.div
+                key={heart.id}
+                className="absolute left-1/2 top-1/3 text-2xl pointer-events-none"
+                initial={{ opacity: 0, y: 0, x: heart.x }}
+                animate={{ opacity: [0, 1, 0], y: -100, x: heart.x }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 2 }}
+              >
+                💕
+              </motion.div>
+            ))}
+          </AnimatePresence>
+
+          {/* Chakudi (Boy) */}
+          <motion.div
+            className="absolute flex flex-col items-center"
+            style={{ right: '25%' }}
+            animate={{
+              x: isKissing ? -30 : 0,
+              scale: isKissing ? 1.1 : 1,
+            }}
+            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+          >
+            <motion.span 
+              className="text-6xl"
+              animate={{ rotate: isKissing ? -10 : 0 }}
+            >
+              {isKissing ? currentKiss.boyEmoji : '👨'}
+            </motion.span>
+            <span className="mt-2 text-sm font-medium text-primary bg-primary/10 px-3 py-1 rounded-full">
+              Chakudi
+            </span>
+          </motion.div>
+        </motion.div>
+
+        {/* Kiss Counter */}
+        <motion.div
+          className="glass-card rounded-full px-6 py-3 mb-6 flex items-center gap-3"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+        >
+          <Heart className="w-5 h-5 text-primary fill-current" />
+          <span className="font-bold text-foreground text-lg">{kissCount}</span>
+          <span className="text-muted-foreground text-sm">kisses shared</span>
+        </motion.div>
+
+        {/* Kiss Types Selection */}
+        <motion.div
+          className="glass-card rounded-3xl p-6 w-full max-w-sm mb-6"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <h3 className="font-serif text-lg font-semibold text-foreground mb-4 text-center">
+            Choose Kiss Type
+          </h3>
+          
+          <div className="grid grid-cols-3 gap-2 mb-4">
+            {KISS_TYPES.slice(0, 3).map((kiss) => (
+              <motion.button
+                key={kiss.id}
+                className={`p-3 rounded-2xl flex flex-col items-center gap-1 transition-all ${
+                  selectedKiss === kiss.id
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-secondary hover:bg-secondary/80 text-foreground'
+                }`}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setSelectedKiss(kiss.id)}
+              >
+                <span className="text-2xl">{kiss.emoji}</span>
+                <span className="text-xs font-medium">{kiss.label}</span>
+              </motion.button>
+            ))}
+          </div>
+          
+          <div className="grid grid-cols-2 gap-2">
+            {KISS_TYPES.slice(3).map((kiss) => (
+              <motion.button
+                key={kiss.id}
+                className={`p-3 rounded-2xl flex flex-col items-center gap-1 transition-all ${
+                  selectedKiss === kiss.id
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-secondary hover:bg-secondary/80 text-foreground'
+                }`}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setSelectedKiss(kiss.id)}
+              >
+                <span className="text-2xl">{kiss.emoji}</span>
+                <span className="text-xs font-medium">{kiss.label}</span>
+              </motion.button>
+            ))}
+          </div>
+
+          <p className="text-center text-muted-foreground text-sm mt-4">
+            {currentKiss.description}
+          </p>
+        </motion.div>
+
+        {/* Kiss Button */}
+        <motion.button
+          className={`w-full max-w-sm py-4 rounded-2xl font-semibold text-lg flex items-center justify-center gap-3 transition-all ${
+            isKissing 
+              ? 'bg-primary/70 text-primary-foreground' 
+              : 'bg-primary text-primary-foreground hover:bg-primary/90'
+          }`}
+          whileHover={{ scale: isKissing ? 1 : 1.02 }}
+          whileTap={{ scale: isKissing ? 1 : 0.98 }}
+          onClick={handleKiss}
+          disabled={isKissing}
+        >
+          <span className="text-2xl">{currentKiss.emoji}</span>
+          {isKissing ? 'Kissing...' : `Give a ${currentKiss.label}!`}
+        </motion.button>
+
+        <motion.p
+          className="text-muted-foreground text-sm mt-6 text-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+        >
+          Mikuu & Chakudi are ready for kisses! 💋
+        </motion.p>
+      </main>
     </div>
   );
 };
