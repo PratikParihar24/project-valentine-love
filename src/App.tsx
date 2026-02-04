@@ -14,6 +14,8 @@ import HugMeter from "./pages/HugMeter";
 import KissWall from "./pages/KissWall";
 import MemoryLane from "./pages/MemoryLane";
 
+import { ChakudiGuide } from "@/components/ChakudiGuide";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -22,6 +24,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <ChakudiGuide />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/rose-garden" element={<RoseGarden />} />

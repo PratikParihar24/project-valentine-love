@@ -1,8 +1,15 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { NavigationMenu } from '@/components/NavigationMenu';
 import { PageHeader } from '@/components/PageHeader';
-import { Flower2 } from 'lucide-react';
+import { Flower2, Trash2 } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 interface Flower {
   id: number;
@@ -11,12 +18,27 @@ interface Flower {
   type: number;
   rotation: number;
   scale: number;
+  swayDuration: number;
+  swayDelay: number;
 }
 
 const FLOWER_EMOJIS = ['🌹', '🌷', '🌸', '💐', '🌺', '🌻', '🌼', '💮'];
 
 const RoseGarden = () => {
-  const [flowers, setFlowers] = useState<Flower[]>([]);
+  const [flowers, setFlowers] = useState<Flower[]>(() => {
+    const saved = localStorage.getItem('rose-garden-flowers');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const [showSurprise, setShowSurprise] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem('rose-garden-flowers', JSON.stringify(flowers));
+
+    if (flowers.length === 50) {
+      setShowSurprise(true);
+    }
+  }, [flowers]);
 
   const handleTap = useCallback((e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
     let x: number, y: number;
@@ -39,13 +61,17 @@ const RoseGarden = () => {
       type: Math.floor(Math.random() * FLOWER_EMOJIS.length),
       rotation: Math.random() * 40 - 20,
       scale: 0.8 + Math.random() * 0.6,
+      swayDuration: 3 + Math.random() * 2,
+      swayDelay: Math.random() * 2,
     };
 
     setFlowers((prev) => [...prev, newFlower]);
   }, []);
 
   const clearGarden = () => {
-    setFlowers([]);
+    if (confirm("Are you sure you want to clear your beautiful garden?")) {
+      setFlowers([]);
+    }
   };
 
   return (
@@ -56,6 +82,22 @@ const RoseGarden = () => {
         subtitle="Rose Day • Feb 7"
         icon={<Flower2 className="w-5 h-5 text-primary" />}
       />
+
+      {/* Surprise Dialog */}
+      <Dialog open={showSurprise} onOpenChange={setShowSurprise}>
+        <DialogContent className="sm:max-w-md border-rose-200 bg-white/95 backdrop-blur-xl">
+          <DialogHeader className="text-center items-center">
+            <div className="w-16 h-16 rounded-full bg-rose-100 flex items-center justify-center mb-4 animate-bounce">
+              <span className="text-3xl">❤️</span>
+            </div>
+            <DialogTitle className="text-3xl font-serif text-rose-600">I LOVE YOU!</DialogTitle>
+            <DialogDescription className="text-lg pt-2 text-foreground/80">
+              You've planted 50 flowers! That's a lot of love! 🌹
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+
 
       {/* Canvas */}
       <div
@@ -71,28 +113,46 @@ const RoseGarden = () => {
           {flowers.map((flower) => (
             <motion.div
               key={flower.id}
-              className="absolute pointer-events-none select-none"
+              className="absolute select-none cursor-pointer"
               style={{
                 left: flower.x,
                 top: flower.y,
-                transform: 'translate(-50%, -50%)',
+                originX: 0.5,
+                originY: 1, // Pivot from bottom
               }}
-              initial={{ scale: 0, opacity: 0, rotate: flower.rotation - 20 }}
+              initial={{ scale: 0, opacity: 0, rotate: flower.rotation }}
               animate={{
                 scale: flower.scale,
                 opacity: 1,
-                rotate: flower.rotation,
+                rotate: [flower.rotation - 5, flower.rotation + 5, flower.rotation - 5],
+              }}
+              whileHover={{
+                scale: flower.scale * 1.5,
+                rotate: flower.rotation, // Stop swaying on hover
+                transition: { duration: 0.2 }
               }}
               exit={{ scale: 0, opacity: 0 }}
               transition={{
-                type: 'spring',
-                stiffness: 300,
-                damping: 15,
+                scale: { type: 'spring', stiffness: 300, damping: 15 },
+                opacity: { duration: 0.3 },
+                rotate: {
+                  repeat: Infinity,
+                  duration: flower.swayDuration,
+                  delay: flower.swayDelay,
+                  ease: "easeInOut"
+                }
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
               }}
             >
-              <span className="text-4xl sm:text-5xl drop-shadow-lg">
-                {FLOWER_EMOJIS[flower.type]}
-              </span>
+              <div
+                style={{ transform: 'translate(-50%, -100%)' }} // Center horizontally, place bottom at x,y
+              >
+                <span className="text-4xl sm:text-5xl drop-shadow-lg filter hover:brightness-110 transition-all">
+                  {FLOWER_EMOJIS[flower.type]}
+                </span>
+              </div>
             </motion.div>
           ))}
         </AnimatePresence>
@@ -111,7 +171,8 @@ const RoseGarden = () => {
                 Tap Anywhere
               </h2>
               <p className="text-muted-foreground text-sm">
-                Plant flowers and grow an infinite garden of love 🌸
+                Plant flowers to grow your garden.<br />
+                <span className="text-primary font-medium mt-1 block">Surprise at 50 roses! 🎁</span>
               </p>
             </div>
           </motion.div>
@@ -120,30 +181,30 @@ const RoseGarden = () => {
 
       {/* Counter & Clear */}
       <motion.div
-        className="fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-4"
+        className="fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-4 pointer-events-auto"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
       >
-        <div className="glass-card rounded-full px-6 py-3 flex items-center gap-3">
+        <div className="glass-card rounded-full px-6 py-3 flex items-center gap-3 shadow-lg bg-white/80 backdrop-blur-md whitespace-nowrap">
           <span className="text-2xl">🌹</span>
-          <span className="font-semibold text-foreground">{flowers.length}</span>
-          <span className="text-muted-foreground text-sm">flowers planted</span>
+          <span className="font-semibold text-foreground w-8 text-center">{flowers.length}</span>
         </div>
 
         {flowers.length > 0 && (
           <motion.button
-            className="glass-card rounded-full px-4 py-3 text-muted-foreground hover:text-foreground transition-colors"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            className="p-3 bg-white/80 backdrop-blur-md rounded-full text-muted-foreground hover:text-red-500 hover:bg-red-50 transition-colors shadow-lg border border-white/20"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
             onClick={(e) => {
               e.stopPropagation();
               clearGarden();
             }}
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
+            aria-label="Clear Garden"
           >
-            Clear
+            <Trash2 className="w-5 h-5" />
           </motion.button>
         )}
       </motion.div>

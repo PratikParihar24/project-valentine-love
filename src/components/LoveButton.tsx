@@ -10,14 +10,27 @@ interface FloatingNumber {
   y: number;
 }
 
+interface Particle {
+  id: number;
+  x: number;
+  y: number;
+  angle: number;
+  velocity: number;
+  scale: number;
+}
+
 export function LoveButton() {
   const { count, increment } = useLoveCounter();
   const [floatingNumbers, setFloatingNumbers] = useState<FloatingNumber[]>([]);
+  const [particles, setParticles] = useState<Particle[]>([]);
   const [showConfetti, setShowConfetti] = useState(false);
   const [isPressed, setIsPressed] = useState(false);
 
   const handleClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
+    // Calculate click position relative to the button center for initial particle source, 
+    // although for the button effect we mostly want them exploding from the center or near the click.
+    // Let's use the click coordinates for floating numbers, and center for particles or mixed.
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
@@ -30,6 +43,24 @@ export function LoveButton() {
     setFloatingNumbers((prev) => [...prev, newFloating]);
     increment();
 
+    // Generate particles
+    const particleCount = 12;
+    const newParticles: Particle[] = [];
+    const now = Date.now();
+
+    for (let i = 0; i < particleCount; i++) {
+      newParticles.push({
+        id: now + i,
+        x: rect.width / 2, // Start from center
+        y: rect.height / 2,
+        angle: (Math.random() * 360 * Math.PI) / 180,
+        velocity: 50 + Math.random() * 100, // Random distance/velocity
+        scale: 0.5 + Math.random() * 0.5,
+      });
+    }
+
+    setParticles(prev => [...prev, ...newParticles]);
+
     // Trigger confetti every 10 clicks
     if ((count + 1) % 10 === 0) {
       setShowConfetti(true);
@@ -38,6 +69,11 @@ export function LoveButton() {
     // Clean up floating numbers
     setTimeout(() => {
       setFloatingNumbers((prev) => prev.filter((n) => n.id !== newFloating.id));
+    }, 1000);
+
+    // Clean up particles
+    setTimeout(() => {
+      setParticles(prev => prev.filter(p => !newParticles.find(np => np.id === p.id)));
     }, 1000);
   }, [count, increment]);
 
@@ -66,7 +102,7 @@ export function LoveButton() {
 
       {/* Love Button */}
       <motion.button
-        className="relative w-40 h-40 rounded-full bg-gradient-to-br from-primary to-rose-deep flex items-center justify-center shadow-glow cursor-pointer border-4 border-primary-foreground/20"
+        className="relative w-40 h-40 rounded-full bg-gradient-to-br from-primary to-rose-deep flex items-center justify-center shadow-glow cursor-pointer border-4 border-primary-foreground/20 z-10"
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         animate={isPressed ? {} : { scale: [1, 1.02, 1] }}
@@ -92,6 +128,27 @@ export function LoveButton() {
         >
           <Heart className="w-20 h-20 text-primary-foreground fill-current" />
         </motion.div>
+
+        {/* Particles */}
+        <AnimatePresence>
+          {particles.map((p) => (
+            <motion.div
+              key={p.id}
+              className="absolute pointer-events-none"
+              style={{ left: '50%', top: '50%' }}
+              initial={{ x: 0, y: 0, scale: 0, opacity: 1 }}
+              animate={{
+                x: Math.cos(p.angle) * p.velocity,
+                y: Math.sin(p.angle) * p.velocity,
+                scale: p.scale,
+                opacity: 0
+              }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+            >
+              <Heart className="w-4 h-4 text-white fill-white" />
+            </motion.div>
+          ))}
+        </AnimatePresence>
 
         {/* Floating +1 numbers */}
         <AnimatePresence>

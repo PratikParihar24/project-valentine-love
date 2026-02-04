@@ -200,7 +200,7 @@ const ChocolateGame = () => {
         {/* Basket */}
         {gameState === 'playing' && (
           <motion.div
-            className="absolute bottom-16 select-none touch-none cursor-grab active:cursor-grabbing"
+            className="absolute bottom-4 select-none touch-none cursor-grab active:cursor-grabbing w-24 h-24"
             style={{
               left: `${basketX}%`,
               transform: 'translateX(-50%)',
@@ -211,7 +211,7 @@ const ChocolateGame = () => {
             dragMomentum={false}
             onDrag={handleDrag}
           >
-            <div className="text-5xl drop-shadow-lg">🧺</div>
+            <div className="text-6xl drop-shadow-lg select-none">🧺</div>
           </motion.div>
         )}
 

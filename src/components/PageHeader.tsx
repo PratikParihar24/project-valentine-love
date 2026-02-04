@@ -13,7 +13,7 @@ export function PageHeader({ title, subtitle, icon }: PageHeaderProps) {
 
   return (
     <motion.header
-      className="fixed top-0 left-0 right-0 z-30 p-4 flex items-center gap-4"
+      className="fixed top-0 left-0 right-0 z-30 p-4 flex items-center gap-4 bg-background/60 backdrop-blur-md shadow-sm"
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
     >

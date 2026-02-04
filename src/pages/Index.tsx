@@ -29,7 +29,7 @@ const Index = () => {
           </motion.div>
 
           <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-4 leading-tight">
-            The Valentine
+            Mikuu's Valentine
             <br />
             <span className="text-primary">Archives</span>
           </h1>
