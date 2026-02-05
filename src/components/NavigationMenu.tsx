@@ -88,13 +88,12 @@ export function NavigationMenu() {
                   return (
                     <motion.button
                       key={day.id}
-                      className={`w-full p-4 rounded-2xl flex items-center gap-4 transition-all ${
-                        day.unlocked
-                          ? isActive
-                            ? 'bg-primary text-primary-foreground'
-                            : 'bg-secondary hover:bg-secondary/80 text-foreground'
-                          : 'bg-muted/50 text-muted-foreground cursor-not-allowed'
-                      }`}
+                      className={`w-full p-4 rounded-2xl flex items-center gap-4 transition-all ${day.unlocked
+                        ? isActive
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-secondary hover:bg-secondary/80 text-foreground'
+                        : 'bg-muted/50 text-muted-foreground cursor-not-allowed'
+                        }`}
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.05 }}
@@ -102,13 +101,12 @@ export function NavigationMenu() {
                       disabled={!day.unlocked}
                     >
                       <div
-                        className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                          day.unlocked
-                            ? isActive
-                              ? 'bg-primary-foreground/20'
-                              : 'bg-primary/10'
-                            : 'bg-muted'
-                        }`}
+                        className={`w-10 h-10 rounded-xl flex items-center justify-center ${day.unlocked
+                          ? isActive
+                            ? 'bg-primary-foreground/20'
+                            : 'bg-primary/10'
+                          : 'bg-muted'
+                          }`}
                       >
                         {day.unlocked ? (
                           <Icon className={`w-5 h-5 ${isActive ? 'text-primary-foreground' : 'text-primary'}`} />
@@ -127,11 +125,10 @@ export function NavigationMenu() {
 
               {/* Home button */}
               <motion.button
-                className={`w-full mt-6 p-4 rounded-2xl flex items-center justify-center gap-2 ${
-                  location.pathname === '/'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-secondary hover:bg-secondary/80 text-foreground'
-                }`}
+                className={`w-full mt-6 p-4 rounded-2xl flex items-center justify-center gap-2 ${location.pathname === '/'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-secondary hover:bg-secondary/80 text-foreground'
+                  }`}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}

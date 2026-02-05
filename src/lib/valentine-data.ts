@@ -14,7 +14,7 @@ export interface ValentineDay {
 export const VALENTINE_DAYS: ValentineDay[] = [
   {
     id: 1,
-    date: new Date(2025, 1, 7), // Feb 7
+    date: new Date(2026, 1, 7), // Feb 7
     name: 'Rose Day',
     title: 'The Infinite Garden',
     icon: Flower2,
@@ -24,7 +24,7 @@ export const VALENTINE_DAYS: ValentineDay[] = [
   },
   {
     id: 2,
-    date: new Date(2025, 1, 8), // Feb 8
+    date: new Date(2026, 1, 8), // Feb 8
     name: 'Propose Day',
     title: 'The Friendship Contract',
     icon: FileHeart,
@@ -34,7 +34,7 @@ export const VALENTINE_DAYS: ValentineDay[] = [
   },
   {
     id: 3,
-    date: new Date(2025, 1, 9), // Feb 9
+    date: new Date(2026, 1, 9), // Feb 9
     name: 'Chocolate Day',
     title: 'Sweet Catcher',
     icon: Candy,
@@ -44,7 +44,7 @@ export const VALENTINE_DAYS: ValentineDay[] = [
   },
   {
     id: 4,
-    date: new Date(2025, 1, 10), // Feb 10
+    date: new Date(2026, 1, 10), // Feb 10
     name: 'Teddy Day',
     title: 'Teddy Love Meter',
     icon: Heart,
@@ -54,7 +54,7 @@ export const VALENTINE_DAYS: ValentineDay[] = [
   },
   {
     id: 5,
-    date: new Date(2025, 1, 11), // Feb 11
+    date: new Date(2026, 1, 11), // Feb 11
     name: 'Promise Day',
     title: 'Time Capsule',
     icon: MessageCircleHeart,
@@ -64,7 +64,7 @@ export const VALENTINE_DAYS: ValentineDay[] = [
   },
   {
     id: 6,
-    date: new Date(2025, 1, 12), // Feb 12
+    date: new Date(2026, 1, 12), // Feb 12
     name: 'Hug Day',
     title: 'Hug Meter',
     icon: Users,
@@ -74,7 +74,7 @@ export const VALENTINE_DAYS: ValentineDay[] = [
   },
   {
     id: 7,
-    date: new Date(2025, 1, 13), // Feb 13
+    date: new Date(2026, 1, 13), // Feb 13
     name: 'Kiss Day',
     title: 'The Kiss Wall',
     icon: Sparkles,
@@ -84,7 +84,7 @@ export const VALENTINE_DAYS: ValentineDay[] = [
   },
   {
     id: 8,
-    date: new Date(2025, 1, 14), // Feb 14
+    date: new Date(2026, 1, 14), // Feb 14
     name: "Valentine's Day",
     title: 'Memory Lane',
     icon: PartyPopper,

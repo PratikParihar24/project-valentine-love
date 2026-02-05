@@ -25,7 +25,7 @@ const Index = () => {
             transition={{ delay: 0.2 }}
           >
             <Sparkles className="w-4 h-4" />
-            Feb 7 - Feb 14, 2025
+            Feb 7 - Feb 14, 2026
           </motion.div>
 
           <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-4 leading-tight">
