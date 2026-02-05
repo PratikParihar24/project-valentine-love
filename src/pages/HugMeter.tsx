@@ -12,57 +12,158 @@ import { Confetti } from '@/components/Confetti';
 const createCharacter = (isGirl: boolean) => {
   const group = new THREE.Group();
   const skinColor = new THREE.Color("#ffdbac");
-  const clothColor = new THREE.Color(isGirl ? "#ffafcc" : "#3b82f6");
-  const eyeColor = new THREE.Color("#222");
+  const girlCoatColor = new THREE.Color("#d2b48c"); // Tan/Beige
+  const boyCoatColor = new THREE.Color("#4a5d4e"); // Grayish Green
+  const eyeColor = new THREE.Color("#3d2b1f"); // Dark brown eyes
 
-  // Body
-  const bodyGeo = new THREE.CapsuleGeometry(0.4, 0.8, 4, 16);
-  const bodyMat = new THREE.MeshToonMaterial({ color: clothColor });
+  // Body - Coat
+  const bodyGroup = new THREE.Group();
+  const bodyGeo = new THREE.CapsuleGeometry(0.35, 0.6, 8, 24);
+  const bodyMat = new THREE.MeshStandardMaterial({
+    color: isGirl ? girlCoatColor : boyCoatColor,
+    roughness: 0.8
+  });
   const body = new THREE.Mesh(bodyGeo, bodyMat);
-  group.add(body);
+  body.castShadow = true;
+  body.receiveShadow = true;
+  bodyGroup.add(body);
+
+  // Fur Collar proxy
+  const furGeo = new THREE.TorusGeometry(0.3, 0.1, 8, 24);
+  const furMat = new THREE.MeshStandardMaterial({ color: "#f5f5f5", roughness: 1 });
+  const collar = new THREE.Mesh(furGeo, furMat);
+  collar.rotation.x = Math.PI / 2;
+  collar.position.y = 0.35;
+  bodyGroup.add(collar);
+
+  // Scarf for boy
+  if (!isGirl) {
+    const scarfGeo = new THREE.TorusGeometry(0.25, 0.08, 8, 24);
+    const scarfMat = new THREE.MeshStandardMaterial({ color: "#c0392b" }); // Deep red
+    const scarf = new THREE.Mesh(scarfGeo, scarfMat);
+    scarf.rotation.x = Math.PI / 2;
+    scarf.position.y = 0.32;
+    bodyGroup.add(scarf);
+
+    // Scarf tail
+    const tailGeo = new THREE.CapsuleGeometry(0.06, 0.3, 4, 8);
+    const tail = new THREE.Mesh(tailGeo, scarfMat);
+    tail.position.set(0.15, 0.1, 0.2);
+    tail.rotation.z = 0.2;
+    bodyGroup.add(tail);
+  }
+
+  // Legs & Boots
+  const bootMat = new THREE.MeshStandardMaterial({ color: "#4834d4" }); // Deep blue pants
+  const bootLeatherMat = new THREE.MeshStandardMaterial({ color: "#4b2c20" }); // Brown boots
+
+  const createLeg = (x: number) => {
+    const legGroup = new THREE.Group();
+    const pants = new THREE.Mesh(new THREE.CapsuleGeometry(0.12, 0.4, 4, 12), bootMat);
+    pants.position.y = -0.5;
+    legGroup.add(pants);
+
+    const boot = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.2, 0.3), bootLeatherMat);
+    boot.position.set(0, -0.75, 0.05);
+    legGroup.add(boot);
+
+    // Fur on boots
+    const bootFur = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.13, 0.1, 16), furMat);
+    bootFur.position.y = -0.65;
+    legGroup.add(bootFur);
+
+    legGroup.position.x = x;
+    return legGroup;
+  };
+
+  bodyGroup.add(createLeg(0.15));
+  bodyGroup.add(createLeg(-0.15));
+  group.add(bodyGroup);
 
   // Head
   const headGroup = new THREE.Group();
-  headGroup.position.set(0, 0.9, 0);
+  headGroup.position.set(0, 0.95, 0);
 
-  const headGeo = new THREE.SphereGeometry(0.35, 32, 32);
-  const headMat = new THREE.MeshToonMaterial({ color: skinColor });
+  const headGeo = new THREE.SphereGeometry(0.38, 32, 32);
+  const headMat = new THREE.MeshStandardMaterial({ color: skinColor, roughness: 0.5 });
   const head = new THREE.Mesh(headGeo, headMat);
+  head.castShadow = true;
+  head.receiveShadow = true;
   headGroup.add(head);
 
-  // Eyes
-  const eyeGeo = new THREE.SphereGeometry(0.05, 16, 16);
-  const eyeMat = new THREE.MeshBasicMaterial({ color: eyeColor });
+  // Face - More refined
+  const createEye = (x: number) => {
+    const eye = new THREE.Group();
+    const white = new THREE.Mesh(new THREE.SphereGeometry(0.08, 16, 16), new THREE.MeshStandardMaterial({ color: "#fff" }));
+    const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.045, 16, 16), new THREE.MeshBasicMaterial({ color: eyeColor }));
+    pupil.position.z = 0.05;
+    const spark = new THREE.Mesh(new THREE.SphereGeometry(0.015, 8, 8), new THREE.MeshBasicMaterial({ color: "#fff" }));
+    spark.position.set(0.02, 0.02, 0.08);
+    eye.add(white);
+    eye.add(pupil);
+    eye.add(spark);
+    eye.position.set(x, 0.05, 0.3);
+    return eye;
+  };
+  head.add(createEye(0.15));
+  head.add(createEye(-0.15));
 
-  const leftEye = new THREE.Mesh(eyeGeo, eyeMat);
-  leftEye.position.set(0.12, 0.05, 0.28);
-  head.add(leftEye);
+  // Small nose
+  const nose = new THREE.Mesh(new THREE.SphereGeometry(0.04, 16, 16), new THREE.MeshStandardMaterial({ color: "#f4a460" }));
+  nose.position.set(0, -0.02, 0.35);
+  head.add(nose);
 
-  const rightEye = new THREE.Mesh(eyeGeo, eyeMat);
-  rightEye.position.set(-0.12, 0.05, 0.28);
-  head.add(rightEye);
+  // Hair - Sweeping style from image
+  const hairColor = new THREE.Color(isGirl ? "#704214" : "#4b2c20");
+  const hairMat = new THREE.MeshStandardMaterial({ color: hairColor, roughness: 0.8 });
 
-  // Hair
-  const hairGeo = new THREE.SphereGeometry(0.36, 16, 16, 0, Math.PI * 2, 0, Math.PI / 2);
-  const hairMat = new THREE.MeshToonMaterial({ color: new THREE.Color(isGirl ? "#4b2c20" : "#2d1b14") });
-  const hair = new THREE.Mesh(hairGeo, hairMat);
-  hair.position.set(0, 0.15, 0);
-  head.add(hair);
+  if (isGirl) {
+    // Girl: Long hair and bangs
+    const hairMain = new THREE.Mesh(new THREE.SphereGeometry(0.4, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2), hairMat);
+    hairMain.position.y = 0.05;
+    head.add(hairMain);
+
+    for (let i = 0; i < 8; i++) {
+      const strand = new THREE.Mesh(new THREE.CapsuleGeometry(0.08, 0.6, 4, 8), hairMat);
+      strand.position.set(Math.sin(i) * 0.3, -0.2, Math.cos(i) * 0.1 - 0.1);
+      strand.rotation.z = Math.sin(i) * 0.5;
+      head.add(strand);
+    }
+  } else {
+    // Boy: Messy/Swept hair
+    const hairMain = new THREE.Mesh(new THREE.SphereGeometry(0.4, 32, 16, 0, Math.PI * 2, 0, Math.PI / 1.8), hairMat);
+    hairMain.position.y = 0.05;
+    head.add(hairMain);
+
+    for (let i = 0; i < 10; i++) {
+      const spike = new THREE.Mesh(new THREE.CapsuleGeometry(0.05, 0.2, 4, 8), hairMat);
+      spike.position.set(Math.random() * 0.4 - 0.2, 0.3, Math.random() * 0.4 - 0.2);
+      spike.rotation.set(Math.random(), Math.random(), Math.random());
+      head.add(spike);
+    }
+  }
 
   group.add(headGroup);
 
-  // Arms
-  const armGeo = new THREE.CapsuleGeometry(0.08, 0.4, 4, 8);
-  const armMat = new THREE.MeshToonMaterial({ color: skinColor });
+  // Arms - Coat sleeves
+  const sleeveMat = bodyMat;
+  const createArm = (x: number, rot: number) => {
+    const armGroup = new THREE.Group();
+    const sleeve = new THREE.Mesh(new THREE.CapsuleGeometry(0.09, 0.4, 4, 8), sleeveMat);
+    armGroup.add(sleeve);
 
-  const leftArm = new THREE.Mesh(armGeo, armMat);
-  leftArm.position.set(0.45, 0.3, 0);
-  leftArm.rotation.z = -Math.PI / 4;
+    const hand = new THREE.Mesh(new THREE.SphereGeometry(0.07, 12, 12), headMat);
+    hand.position.y = -0.25;
+    armGroup.add(hand);
+
+    armGroup.position.set(x, 0.3, 0);
+    armGroup.rotation.z = rot;
+    return armGroup;
+  };
+
+  const leftArm = createArm(0.45, -Math.PI / 4);
+  const rightArm = createArm(-0.45, Math.PI / 4);
   group.add(leftArm);
-
-  const rightArm = new THREE.Mesh(armGeo, armMat);
-  rightArm.position.set(-0.45, 0.3, 0);
-  rightArm.rotation.z = Math.PI / 4;
   group.add(rightArm);
 
   return { group, head, leftArm, rightArm };
@@ -93,15 +194,23 @@ const HugMeter = () => {
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(containerRef.current.clientWidth, containerRef.current.clientHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     containerRef.current.appendChild(renderer.domElement);
 
     // Lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
     scene.add(ambientLight);
 
-    const pointLight = new THREE.PointLight(0xffffff, 1.5);
-    pointLight.position.set(10, 10, 10);
-    scene.add(pointLight);
+    const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0xffafcc, 0.4);
+    scene.add(hemisphereLight);
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    directionalLight.position.set(5, 10, 5);
+    directionalLight.castShadow = true;
+    directionalLight.shadow.mapSize.width = 1024;
+    directionalLight.shadow.mapSize.height = 1024;
+    scene.add(directionalLight);
 
     const mikuu = createCharacter(true);
     const chakudi = createCharacter(false);
