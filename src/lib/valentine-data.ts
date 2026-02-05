@@ -46,9 +46,9 @@ export const VALENTINE_DAYS: ValentineDay[] = [
     id: 4,
     date: new Date(2025, 1, 10), // Feb 10
     name: 'Teddy Day',
-    title: 'Build-a-Buddy',
+    title: 'Teddy Love Meter',
     icon: Heart,
-    description: 'Customize your perfect teddy friend',
+    description: "Keep your teddy happy to win its love!",
     path: '/build-a-buddy',
     unlocked: false,
   },

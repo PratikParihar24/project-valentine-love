@@ -1,8 +1,9 @@
+import { useRef, useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useCallback, useEffect } from 'react';
 import { NavigationMenu } from '@/components/NavigationMenu';
 import { PageHeader } from '@/components/PageHeader';
 import { Flower2, Trash2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import {
   Dialog,
   DialogContent,
@@ -31,14 +32,37 @@ const RoseGarden = () => {
   });
 
   const [showSurprise, setShowSurprise] = useState(false);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const { toast } = useToast();
+  const [lastMilestone, setLastMilestone] = useState(0);
 
   useEffect(() => {
     localStorage.setItem('rose-garden-flowers', JSON.stringify(flowers));
 
-    if (flowers.length === 50) {
+    // Milestone Check
+    const count = flowers.length;
+    if (count >= 100 && lastMilestone < 100) {
+      toast({
+        title: "Eternal Garden! 🌹",
+        description: "Your garden is breathtaking! 100 roses of pure love.",
+      });
+      setLastMilestone(100);
+    } else if (count >= 50 && lastMilestone < 50) {
+      toast({
+        title: "Growing Love! ✨",
+        description: "50 roses... your love is blooming beautifully!",
+        variant: "default",
+      });
       setShowSurprise(true);
+      setLastMilestone(50);
+    } else if (count >= 10 && lastMilestone < 10) {
+      toast({
+        title: "A Sweet Start! 🌸",
+        description: "10 roses planted with care.",
+      });
+      setLastMilestone(10);
     }
-  }, [flowers]);
+  }, [flowers, toast, lastMilestone]);
 
   const handleTap = useCallback((e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
     let x: number, y: number;
@@ -69,9 +93,9 @@ const RoseGarden = () => {
   }, []);
 
   const clearGarden = () => {
-    if (confirm("Are you sure you want to clear your beautiful garden?")) {
-      setFlowers([]);
-    }
+    setFlowers([]);
+    setLastMilestone(0);
+    setShowClearConfirm(false);
   };
 
   return (
@@ -99,7 +123,34 @@ const RoseGarden = () => {
       </Dialog>
 
 
-      {/* Canvas */}
+      {/* Clear Garden Confirmation */}
+      <Dialog open={showClearConfirm} onOpenChange={setShowClearConfirm}>
+        <DialogContent className="sm:max-w-md border-rose-200 bg-white/95 backdrop-blur-xl">
+          <DialogHeader className="text-center items-center">
+            <div className="w-16 h-16 rounded-full bg-rose-50 flex items-center justify-center mb-4 text-3xl">
+              🥀
+            </div>
+            <DialogTitle className="text-2xl font-serif text-rose-600">Clear the Garden?</DialogTitle>
+            <DialogDescription className="text-base pt-2 text-foreground/80">
+              Are you sure you want to clear your beautiful garden? All your flowers will be gone! 🥺
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-3 justify-center mt-4">
+            <button
+              onClick={() => setShowClearConfirm(false)}
+              className="px-6 py-2 rounded-full border border-rose-200 text-rose-600 hover:bg-rose-50 transition-colors font-medium"
+            >
+              Wait, No!
+            </button>
+            <button
+              onClick={clearGarden}
+              className="px-6 py-2 rounded-full bg-rose-500 text-white hover:bg-rose-600 transition-colors shadow-md font-medium"
+            >
+              Clear Anyway
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
       <div
         className="fixed inset-0 pt-20 cursor-crosshair"
         onClick={handleTap}
@@ -198,7 +249,7 @@ const RoseGarden = () => {
             whileTap={{ scale: 0.9 }}
             onClick={(e) => {
               e.stopPropagation();
-              clearGarden();
+              setShowClearConfirm(true);
             }}
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}

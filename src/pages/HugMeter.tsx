@@ -7,6 +7,7 @@ import { NavigationMenu } from '@/components/NavigationMenu';
 import { PageHeader } from '@/components/PageHeader';
 import { Users, Heart } from 'lucide-react';
 import { Confetti } from '@/components/Confetti';
+import { useToast } from '@/hooks/use-toast';
 
 // Helper to create a stylized character in Three.js
 const createCharacter = (isGirl: boolean) => {
@@ -172,7 +173,8 @@ const createCharacter = (isGirl: boolean) => {
 const HugMeter = () => {
   const [value, setValue] = useState(0);
   const [showConfetti, setShowConfetti] = useState(false);
-  const [hasReachedMax, setHasReachedMax] = useState(false);
+  const { toast } = useToast();
+  const lastMilestoneRef = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<{
     scene: THREE.Scene,
@@ -275,24 +277,36 @@ const HugMeter = () => {
 
     // Hugging arm motion at 100%
     if (value === 100) {
-      mikuu.leftArm.rotation.z = Math.PI / 2;
-      mikuu.rightArm.rotation.z = -Math.PI / 2;
-      chakudi.leftArm.rotation.z = Math.PI / 2;
-      chakudi.rightArm.rotation.z = -Math.PI / 2;
+      // Reach forward and wrap around
+      mikuu.leftArm.rotation.set(Math.PI / 4, 0, Math.PI / 2.5);
+      mikuu.rightArm.rotation.set(Math.PI / 4, 0, -Math.PI / 2.5);
+      chakudi.leftArm.rotation.set(Math.PI / 4, 0, Math.PI / 2.5);
+      chakudi.rightArm.rotation.set(Math.PI / 4, 0, -Math.PI / 2.5);
     } else {
-      mikuu.leftArm.rotation.z = -Math.PI / 4;
-      mikuu.rightArm.rotation.z = Math.PI / 4;
-      chakudi.leftArm.rotation.z = -Math.PI / 4;
-      chakudi.rightArm.rotation.z = Math.PI / 4;
+      mikuu.leftArm.rotation.set(0, 0, -Math.PI / 4);
+      mikuu.rightArm.rotation.set(0, 0, Math.PI / 4);
+      chakudi.leftArm.rotation.set(0, 0, -Math.PI / 4);
+      chakudi.rightArm.rotation.set(0, 0, Math.PI / 4);
     }
   }, [value]);
+
+  // Milestone Check
+  useEffect(() => {
+    if (value >= 50 && lastMilestoneRef.current < 50 && value < 100) {
+      toast({
+        title: "Heartbeats Rising... 🤗",
+        description: "Mikuu & Chakudi are getting closer! Halfway to a mega hug.",
+      });
+      lastMilestoneRef.current = 50;
+    }
+    if (value < 50) lastMilestoneRef.current = 0;
+  }, [value, toast]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = parseInt(e.target.value, 10);
     setValue(newValue);
 
-    if (newValue === 100 && !hasReachedMax) {
-      setHasReachedMax(true);
+    if (newValue === 100) {
       setShowConfetti(true);
     }
   };

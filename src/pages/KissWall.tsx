@@ -5,7 +5,8 @@ import { OrbitControls, ContactShadows } from '@react-three/drei';
 import * as THREE from 'three';
 import { NavigationMenu } from '@/components/NavigationMenu';
 import { PageHeader } from '@/components/PageHeader';
-import { Sparkles, Heart } from 'lucide-react';
+import { Trash2, Heart, Sparkles, Share2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import { Confetti } from '@/components/Confetti';
 
 type KissType = 'peck' | 'cheek' | 'forehead' | 'butterfly' | 'eskimo';
@@ -22,10 +23,6 @@ interface KissConfig {
 
 const KISS_TYPES: KissConfig[] = [
   { id: 'peck', label: 'Quick Peck', emoji: '💋', description: 'A sweet quick kiss', girlEmoji: '😗', boyEmoji: '😙', kissEmoji: '💋' },
-  { id: 'cheek', label: 'Cheek Kiss', emoji: '😘', description: 'A gentle kiss on the cheek', girlEmoji: '😚', boyEmoji: '☺️', kissEmoji: '💕' },
-  { id: 'forehead', label: 'Forehead Kiss', emoji: '🥰', description: 'A caring forehead kiss', girlEmoji: '🥰', boyEmoji: '😌', kissEmoji: '💗' },
-  { id: 'butterfly', label: 'Butterfly Kiss', emoji: '🦋', description: 'Eyelashes fluttering', girlEmoji: '😊', boyEmoji: '😊', kissEmoji: '🦋' },
-  { id: 'eskimo', label: 'Eskimo Kiss', emoji: '👃', description: 'Nose to nose rub', girlEmoji: '🤭', boyEmoji: '😄', kissEmoji: '💖' },
 ];
 
 const createKissingCharacter = (isGirl: boolean) => {
@@ -190,6 +187,8 @@ const KissWall = () => {
   const [kissCount, setKissCount] = useState(0);
   const [showConfetti, setShowConfetti] = useState(false);
   const [floatingHearts, setFloatingHearts] = useState<{ id: number; x: number }[]>([]);
+  const { toast } = useToast();
+  const lastMilestoneRef = useRef(0);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<{
@@ -278,24 +277,6 @@ const KissWall = () => {
           mikuu.head.rotation.x = -0.2;
           chakudi.head.rotation.x = 0.2;
           break;
-        case 'cheek':
-          mikuu.group.position.x = -0.7;
-          chakudi.group.position.x = 0.3;
-          mikuu.group.rotation.y = 0.5;
-          break;
-        case 'forehead':
-          mikuu.group.position.x = -0.5;
-          chakudi.group.position.x = 0.5;
-          chakudi.head.rotation.x = 0.4;
-          break;
-        case 'butterfly':
-          mikuu.group.position.x = -0.2;
-          chakudi.group.position.x = 0.2;
-          break;
-        case 'eskimo':
-          mikuu.group.position.x = -0.25;
-          chakudi.group.position.x = 0.25;
-          break;
       }
     } else {
       // Reset positions smoothly
@@ -307,6 +288,23 @@ const KissWall = () => {
       chakudi.head.rotation.x = 0;
     }
   }, [isKissing, selectedKiss]);
+
+  // Milestone Check
+  useEffect(() => {
+    if (kissCount >= 30 && lastMilestoneRef.current < 30) {
+      toast({
+        title: "Kiss Overload! 💋✨",
+        description: "30 kisses on the wall! Your love is legendary!",
+      });
+      lastMilestoneRef.current = 30;
+    } else if (kissCount >= 10 && lastMilestoneRef.current < 10) {
+      toast({
+        title: "Ten Kisses! 💋",
+        description: "A beautiful collection of sweet pecks.",
+      });
+      lastMilestoneRef.current = 10;
+    }
+  }, [kissCount, toast]);
 
   const handleKiss = () => {
     if (isKissing) return;
@@ -393,44 +391,13 @@ const KissWall = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <h3 className="font-serif text-lg font-semibold text-foreground mb-4 text-center">
-            Choose Kiss Type
-          </h3>
-
-          <div className="grid grid-cols-3 gap-2 mb-4">
-            {KISS_TYPES.slice(0, 3).map((kiss) => (
-              <motion.button
-                key={kiss.id}
-                className={`p-3 rounded-2xl flex flex-col items-center gap-1 transition-all ${selectedKiss === kiss.id
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-secondary hover:bg-secondary/80 text-foreground'
-                  }`}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setSelectedKiss(kiss.id)}
-              >
-                <span className="text-2xl">{kiss.emoji}</span>
-                <span className="text-xs font-medium">{kiss.label}</span>
-              </motion.button>
-            ))}
-          </div>
-
-          <div className="grid grid-cols-2 gap-2">
-            {KISS_TYPES.slice(3).map((kiss) => (
-              <motion.button
-                key={kiss.id}
-                className={`p-3 rounded-2xl flex flex-col items-center gap-1 transition-all ${selectedKiss === kiss.id
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-secondary hover:bg-secondary/80 text-foreground'
-                  }`}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setSelectedKiss(kiss.id)}
-              >
-                <span className="text-2xl">{kiss.emoji}</span>
-                <span className="text-xs font-medium">{kiss.label}</span>
-              </motion.button>
-            ))}
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center text-4xl animate-pulse">
+              {currentKiss.emoji}
+            </div>
+            <h3 className="font-serif text-xl font-semibold text-foreground">
+              {currentKiss.label}
+            </h3>
           </div>
 
           <p className="text-center text-muted-foreground text-sm mt-4">

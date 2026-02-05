@@ -14,6 +14,11 @@ const TimeCapsule = () => {
     return localStorage.getItem('time-capsule-note') || '';
   });
   const [isSealing, setIsSealing] = useState(false);
+  const [isSealedByDate, setIsSealedByDate] = useState(() => {
+    const today = new Date();
+    const sealingDate = new Date(2025, 1, 11); // Feb 11, 2025
+    return today >= sealingDate;
+  });
 
   useEffect(() => {
     if (isLocked) {
@@ -45,8 +50,17 @@ const TimeCapsule = () => {
       />
 
       <main className="pt-24 pb-8 px-4 max-w-2xl mx-auto relative z-10">
+        {isSealedByDate && !isLocked && (
+          <motion.div
+            className="mb-6 p-4 rounded-2xl bg-amber-500/20 border border-amber-500/30 text-amber-900 text-center font-medium shadow-sm backdrop-blur-sm"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            🔒 Promise Day has passed! The time capsule is now sealed forever.
+          </motion.div>
+        )}
         <AnimatePresence mode="wait">
-          {!isLocked && !isSealing ? (
+          {!isLocked && !isSealing && !isSealedByDate ? (
             <motion.div
               key="write"
               className="glass-card rounded-[2rem] p-8 border-2 border-primary/10 shadow-2xl"

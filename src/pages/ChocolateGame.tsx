@@ -2,8 +2,9 @@ import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { NavigationMenu } from '@/components/NavigationMenu';
 import { PageHeader } from '@/components/PageHeader';
-import { Candy, Play, RotateCcw, Trophy } from 'lucide-react';
+import { Candy, Play, RotateCcw, Trophy, Award, Star, Heart } from 'lucide-react';
 import { Confetti } from '@/components/Confetti';
+import { useToast } from '@/hooks/use-toast';
 
 interface FallingItem {
   id: number;
@@ -32,6 +33,8 @@ const ChocolateGame = () => {
   const gameAreaRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<number>();
   const lastSpawnRef = useRef<number>(0);
+  const { toast } = useToast();
+  const lastMilestoneRef = useRef(0);
 
   // Timer
   useEffect(() => {
@@ -54,6 +57,32 @@ const ChocolateGame = () => {
 
     return () => clearInterval(interval);
   }, [gameState, score, highScore]);
+
+  // Milestone check
+  useEffect(() => {
+    if (gameState !== 'playing') return;
+
+    if (score >= 100 && score > lastMilestoneRef.current) {
+      toast({
+        title: "Chocolate Fever! 🍫🍫",
+        description: "100 treats! You're a candy pro!",
+        variant: "default",
+      });
+      lastMilestoneRef.current = 100;
+    } else if (score >= 50 && score > lastMilestoneRef.current) {
+      toast({
+        title: "Sweet Victory! 🍭",
+        description: "50 treats caught! Keep going!",
+      });
+      lastMilestoneRef.current = 50;
+    } else if (score >= 20 && score > lastMilestoneRef.current) {
+      toast({
+        title: "Nice Catch! 🍬",
+        description: "20 treats! You've got the rhythm.",
+      });
+      lastMilestoneRef.current = 20;
+    }
+  }, [score, gameState, toast]);
 
   // Game loop
   useEffect(() => {
