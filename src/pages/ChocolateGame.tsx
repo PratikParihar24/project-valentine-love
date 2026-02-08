@@ -2,7 +2,7 @@ import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { NavigationMenu } from '@/components/NavigationMenu';
 import { PageHeader } from '@/components/PageHeader';
-import { Candy, Play, RotateCcw, Trophy, Award, Star, Heart } from 'lucide-react';
+import { Candy, Play, RotateCcw, Trophy, Award, Star, Heart, Crown, Sparkles } from 'lucide-react';
 import { Confetti } from '@/components/Confetti';
 import { useToast } from '@/hooks/use-toast';
 
@@ -17,7 +17,6 @@ interface FallingItem {
 
 const CHOCOLATES = ['🍫', '🍬', '🍭', '🧁', '🍪', '🍩', '🎂'];
 const GAME_DURATION = 30;
-const BASKET_WIDTH = 80;
 
 const ChocolateGame = () => {
   const [gameState, setGameState] = useState<'idle' | 'playing' | 'ended'>('idle');
@@ -26,8 +25,25 @@ const ChocolateGame = () => {
     const stored = localStorage.getItem('chocolate-high-score');
     return stored ? parseInt(stored, 10) : 0;
   });
+
+  // Milestone Persistence State
+  const [royalBasketUnlocked, setRoyalBasketUnlocked] = useState(() =>
+    localStorage.getItem('chocolate-royal-basket-unlocked') === 'true'
+  );
+  const [extraSparklesUnlocked, setExtraSparklesUnlocked] = useState(() =>
+    localStorage.getItem('chocolate-extra-sparkles-unlocked') === 'true'
+  );
+
+  const [showMilestone30, setShowMilestone30] = useState(false);
   const [timeLeft, setTimeLeft] = useState(GAME_DURATION);
   const [basketX, setBasketX] = useState(50);
+  const basketXRef = useRef(50);
+
+  // Sync ref with state for logic access without re-running effects
+  useEffect(() => {
+    basketXRef.current = basketX;
+  }, [basketX]);
+
   const [items, setItems] = useState<FallingItem[]>([]);
   const [showConfetti, setShowConfetti] = useState(false);
   const gameAreaRef = useRef<HTMLDivElement>(null);
@@ -44,6 +60,9 @@ const ChocolateGame = () => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           setGameState('ended');
+          if (score >= 30) {
+            setShowMilestone30(true);
+          }
           if (score > highScore) {
             setHighScore(score);
             localStorage.setItem('chocolate-high-score', score.toString());
@@ -62,27 +81,44 @@ const ChocolateGame = () => {
   useEffect(() => {
     if (gameState !== 'playing') return;
 
-    if (score >= 100 && score > lastMilestoneRef.current) {
+    // Milestone 70: Golden Gala
+    if (score >= 70 && !extraSparklesUnlocked) {
+      setExtraSparklesUnlocked(true);
+      localStorage.setItem('chocolate-extra-sparkles-unlocked', 'true');
+      toast({
+        title: "Golden Gala Unlocked! ✨",
+        description: "The background is now shimmering with gold and pink!",
+      });
+    }
+
+    // Milestone 50: Royal Heart Basket
+    if (score >= 50 && !royalBasketUnlocked) {
+      setRoyalBasketUnlocked(true);
+      localStorage.setItem('chocolate-royal-basket-unlocked', 'true');
+      toast({
+        title: "Royal Basket Unlocked! 👑",
+        description: "You've earned the Royal Heart Basket!",
+      });
+    }
+
+    // Existing generic milestones (Exactly on the mark)
+    if (score === 100 && lastMilestoneRef.current < 100) {
       toast({
         title: "Chocolate Fever! 🍫🍫",
         description: "100 treats! You're a candy pro!",
         variant: "default",
       });
       lastMilestoneRef.current = 100;
-    } else if (score >= 50 && score > lastMilestoneRef.current) {
-      toast({
-        title: "Sweet Victory! 🍭",
-        description: "50 treats caught! Keep going!",
-      });
+    } else if (score === 50 && lastMilestoneRef.current < 50) {
       lastMilestoneRef.current = 50;
-    } else if (score >= 20 && score > lastMilestoneRef.current) {
+    } else if (score === 20 && lastMilestoneRef.current < 20) {
       toast({
         title: "Nice Catch! 🍬",
         description: "20 treats! You've got the rhythm.",
       });
       lastMilestoneRef.current = 20;
     }
-  }, [score, gameState, toast]);
+  }, [score, gameState, toast, royalBasketUnlocked, extraSparklesUnlocked]);
 
   // Game loop
   useEffect(() => {
@@ -113,11 +149,19 @@ const ChocolateGame = () => {
           }))
           .filter((item) => {
             // Check if caught
-            const basketLeft = basketX - (BASKET_WIDTH / 2 / window.innerWidth) * 100;
-            const basketRight = basketX + (BASKET_WIDTH / 2 / window.innerWidth) * 100;
+            const basketPixelWidth = royalBasketUnlocked ? 106 : 96; // Matching w-24 (96px) + scaling
+            const gameWidth = gameAreaRef.current?.clientWidth || window.innerWidth;
+            const hitWidth = (basketPixelWidth / gameWidth) * 100;
 
-            if (item.y > 80 && item.y < 95) {
-              if (item.x >= basketLeft - 5 && item.x <= basketRight + 5) {
+            // Use ref to avoid re-running game loop effect on every mouse move
+            const currentBasketX = basketXRef.current;
+            const basketLeft = currentBasketX - hitWidth / 2;
+            const basketRight = currentBasketX + hitWidth / 2;
+
+            // item.y is the center of the chocolate. 
+            // We'll check 82-98% with a small extra horizontal buffer (2.5%) for chocolate width
+            if (item.y > 82 && item.y < 98) {
+              if (item.x >= basketLeft - 2.5 && item.x <= basketRight + 2.5) {
                 setScore((s) => s + 1);
                 return false;
               }
@@ -138,7 +182,7 @@ const ChocolateGame = () => {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [gameState, basketX]);
+  }, [gameState]); // Removed basketX dependency
 
   const startGame = () => {
     setGameState('playing');
@@ -146,6 +190,7 @@ const ChocolateGame = () => {
     setTimeLeft(GAME_DURATION);
     setItems([]);
     lastSpawnRef.current = 0;
+    lastMilestoneRef.current = 0;
   };
 
   const handleDrag = useCallback((e: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
@@ -164,7 +209,38 @@ const ChocolateGame = () => {
   }, [gameState]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-amber-50/30 to-background relative overflow-hidden">
+    <div className={`min-h-screen transition-colors duration-1000 relative overflow-hidden ${extraSparklesUnlocked
+      ? 'bg-[radial-gradient(circle_at_center,_var(--tw-gradient-from),_#fffce6_0%,_#ffeef0_50%,_#fff_100%)]'
+      : 'bg-gradient-to-b from-background via-amber-50/30 to-background'
+      }`}>
+      {extraSparklesUnlocked && (
+        <div className="absolute inset-0 pointer-events-none opacity-40">
+          {[...Array(20)].map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute text-amber-400"
+              initial={{
+                x: Math.random() * 100 + '%',
+                y: Math.random() * 100 + '%',
+                scale: 0.5,
+                opacity: 0
+              }}
+              animate={{
+                y: [null, '-20%', '120%'],
+                opacity: [0, 1, 0],
+                rotate: [0, 360]
+              }}
+              transition={{
+                duration: 5 + Math.random() * 5,
+                repeat: Infinity,
+                delay: Math.random() * 5
+              }}
+            >
+              <Sparkles className="w-4 h-4" />
+            </motion.div>
+          ))}
+        </div>
+      )}
       <NavigationMenu />
       <PageHeader
         title="Sweet Catcher"
@@ -229,7 +305,7 @@ const ChocolateGame = () => {
         {/* Basket */}
         {gameState === 'playing' && (
           <motion.div
-            className="absolute bottom-4 select-none touch-none cursor-grab active:cursor-grabbing w-24 h-24"
+            className="absolute bottom-4 select-none touch-none cursor-grab active:cursor-grabbing w-24 h-24 flex items-center justify-center"
             style={{
               left: `${basketX}%`,
               transform: 'translateX(-50%)',
@@ -240,7 +316,25 @@ const ChocolateGame = () => {
             dragMomentum={false}
             onDrag={handleDrag}
           >
-            <div className="text-6xl drop-shadow-lg select-none">🧺</div>
+            <div className="relative">
+              {royalBasketUnlocked && (
+                <motion.div
+                  className="absolute -top-6 left-1/2 -translate-x-1/2"
+                  initial={{ y: 10, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                >
+                  <Crown className="w-8 h-8 text-amber-500 fill-amber-200" />
+                </motion.div>
+              )}
+              <div className={`text-6xl drop-shadow-xl select-none transition-transform duration-300 ${royalBasketUnlocked ? 'scale-110' : ''}`}>
+                {royalBasketUnlocked ? '💝' : '🧺'}
+              </div>
+              {royalBasketUnlocked && (
+                <div className="absolute inset-0 flex items-center justify-center opacity-40">
+                  <Heart className="w-12 h-12 text-primary fill-primary" />
+                </div>
+              )}
+            </div>
           </motion.div>
         )}
 
@@ -304,6 +398,60 @@ const ChocolateGame = () => {
             </div>
           </motion.div>
         )}
+
+        {/* Milestone 30 Overlay */}
+        <AnimatePresence>
+          {showMilestone30 && (
+            <motion.div
+              className="absolute inset-0 flex items-center justify-center z-50 bg-background/40 backdrop-blur-sm p-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <motion.div
+                className="glass-card rounded-[2rem] p-10 text-center max-w-sm border-2 border-primary/20 shadow-2xl relative overflow-hidden"
+                initial={{ scale: 0.8, y: 20 }}
+                animate={{ scale: 1, y: 0 }}
+                transition={{ type: "spring", damping: 15 }}
+              >
+                {/* Decorative Elements */}
+                <motion.div
+                  className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent"
+                  animate={{ opacity: [0, 1, 0] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                />
+
+                <div className="text-6xl mb-6 relative">
+                  🍫
+                  <motion.div
+                    className="absolute -top-2 -right-2"
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                  >
+                    <Sparkles className="w-6 h-6 text-amber-400" />
+                  </motion.div>
+                </div>
+
+                <h2 className="font-serif text-3xl font-bold text-foreground mb-4 leading-tight">
+                  A Sweet Milestone!
+                </h2>
+
+                <p className="text-xl italic text-primary/80 mb-8 font-medium">
+                  "A chocolate for my Thirty on crossing 30."
+                </p>
+
+                <motion.button
+                  className="w-full py-4 rounded-2xl bg-primary text-primary-foreground font-bold text-lg shadow-lg hover:shadow-primary/20 transition-all"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setShowMilestone30(false)}
+                >
+                  Continue Game
+                </motion.button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
