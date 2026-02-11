@@ -16,7 +16,7 @@ const TimeCapsule = () => {
   const [isSealing, setIsSealing] = useState(false);
   const [isSealedByDate, setIsSealedByDate] = useState(() => {
     const today = new Date();
-    const sealingDate = new Date(2025, 1, 11); // Feb 11, 2025
+    const sealingDate = new Date(2026, 1, 12); // Feb 12, 2026
     return today >= sealingDate;
   });
 

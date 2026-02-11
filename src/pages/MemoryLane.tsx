@@ -19,7 +19,7 @@ const MILESTONES: Milestone[] = [
   { icon: Gift, title: 'First Gift', description: 'A token of friendship', emoji: '🎁' },
   { icon: Heart, title: 'Through Thick & Thin', description: 'Always there for each other', emoji: '💪' },
   { icon: Sparkles, title: 'Making Memories', description: 'Every moment matters', emoji: '✨' },
-  { icon: PartyPopper, title: "Valentine's 2025", description: 'Best friends forever!', emoji: '🎉' },
+  { icon: PartyPopper, title: "Valentine's 2026", description: 'Best friends forever!', emoji: '🎉' },
 ];
 
 const MemoryLane = () => {
@@ -82,17 +82,17 @@ const MemoryLane = () => {
                 >
                   {/* Path line */}
                   <div className="h-1 bg-gradient-to-r from-primary/50 via-primary to-primary/50 rounded-full mb-4" />
-                  
+
                   {/* Card */}
                   <div className="glass-card rounded-3xl p-6 relative">
                     {/* Pixel-style border */}
                     <div className="absolute inset-0 rounded-3xl border-4 border-dashed border-primary/20 pointer-events-none" />
-                    
+
                     <div className="flex items-start gap-4">
                       <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0">
                         <span className="text-3xl">{milestone.emoji}</span>
                       </div>
-                      
+
                       <div className="flex-1">
                         <h3 className="font-serif text-lg font-semibold text-foreground mb-1">
                           {milestone.title}
@@ -126,35 +126,35 @@ const MemoryLane = () => {
             >
               <div className="glass-card rounded-3xl p-8 text-center bg-gradient-to-br from-primary/20 to-accent/20">
                 <motion.div
-                  animate={{ 
+                  animate={{
                     scale: [1, 1.1, 1],
                     rotate: [0, 5, -5, 0],
                   }}
-                  transition={{ 
-                    repeat: Infinity, 
+                  transition={{
+                    repeat: Infinity,
                     duration: 2,
                   }}
                   className="text-6xl mb-4"
                 >
                   💝
                 </motion.div>
-                
+
                 <h2 className="font-serif text-2xl font-bold text-foreground mb-2">
                   Happy Valentine's Day!
                 </h2>
-                
+
                 <p className="text-muted-foreground text-sm mb-4">
                   Here's to many more memories together
                 </p>
-                
+
                 <div className="flex justify-center gap-2">
                   {['💕', '✨', '🎉', '💖', '🌟'].map((emoji, i) => (
                     <motion.span
                       key={i}
                       className="text-xl"
                       animate={{ y: [0, -5, 0] }}
-                      transition={{ 
-                        repeat: Infinity, 
+                      transition={{
+                        repeat: Infinity,
                         duration: 1,
                         delay: i * 0.1,
                       }}
