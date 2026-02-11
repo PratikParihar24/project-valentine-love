@@ -3,10 +3,13 @@ import { useState, useEffect } from 'react';
 import { NavigationMenu } from '@/components/NavigationMenu';
 import { PageHeader } from '@/components/PageHeader';
 import { MessageCircleHeart, Lock, Send, Mail } from 'lucide-react';
+import emailjs from '@emailjs/browser';
+import { toast } from 'sonner';
 
 const TimeCapsule = () => {
   const [note, setNote] = useState('');
   const [email, setEmail] = useState('');
+  const [isSending, setIsSending] = useState(false);
   const [isLocked, setIsLocked] = useState(() => {
     return localStorage.getItem('time-capsule-locked') === 'true';
   });
@@ -28,15 +31,46 @@ const TimeCapsule = () => {
     }
   }, [isLocked, savedNote, email]);
 
-  const handleSeal = () => {
+  const handleSeal = async () => {
     if (!note.trim() || !email.trim()) return;
-    setIsSealing(true);
-    setSavedNote(note);
 
-    setTimeout(() => {
-      setIsLocked(true);
-      setIsSealing(false);
-    }, 2000);
+    setIsSending(true);
+    setIsSealing(true);
+
+    try {
+      const templateParams = {
+        to_email: email,
+        message: note,
+        from_name: "Mikuu's Valentine Archives",
+      };
+
+      await emailjs.send(
+        import.meta.env.VITE_EMAILJS_SERVICE_ID || 'service_placeholder',
+        import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'template_placeholder',
+        templateParams,
+        import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'public_key_placeholder'
+      );
+
+      setSavedNote(note);
+      toast.success("Promises sealed and confirmation email sent! ❤️");
+
+      setTimeout(() => {
+        setIsLocked(true);
+        setIsSealing(false);
+        setIsSending(false);
+      }, 2000);
+    } catch (error) {
+      console.error('Email failed to send:', error);
+      toast.error("Failed to send confirmation email, but your promises are saved locally! ✨");
+
+      // Still proceed with local lock even if email fails
+      setSavedNote(note);
+      setTimeout(() => {
+        setIsLocked(true);
+        setIsSealing(false);
+        setIsSending(false);
+      }, 2000);
+    }
   };
 
   return (
@@ -122,7 +156,7 @@ This will be locked in time and space, sent back to your heart in 365 days."
                 whileHover={{ scale: 1.02, boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.1)" }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleSeal}
-                disabled={!note.trim() || !email.trim()}
+                disabled={!note.trim() || !email.trim() || isSending}
               >
                 <Lock className="w-6 h-6" />
                 Seal Our Destiny, Mikuu
