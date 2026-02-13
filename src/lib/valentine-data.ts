@@ -86,10 +86,10 @@ export const VALENTINE_DAYS: ValentineDay[] = [
     id: 8,
     date: new Date(2026, 1, 14), // Feb 14
     name: "Valentine's Day",
-    title: 'Memory Lane',
+    title: "The Constellation",
     icon: PartyPopper,
-    description: 'A journey through our memories',
-    path: '/memory-lane',
+    description: "Connect the stars to reveal our story",
+    path: '/the-constellation',
     unlocked: false,
   },
 ];

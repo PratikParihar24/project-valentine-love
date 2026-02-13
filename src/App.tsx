@@ -12,6 +12,7 @@ import ChocolateGame from "./pages/ChocolateGame";
 import BuildABuddy from "./pages/BuildABuddy";
 import TimeCapsule from "./pages/TimeCapsule";
 import MemoryLane from "./pages/MemoryLane";
+import TheConstellation from "./pages/TheConstellation";
 
 // Lazy load 3D components to prevent global crash
 const HugMeter = lazy(() => import("./pages/HugMeter"));
@@ -102,6 +103,7 @@ const AppContent = () => {
           <Route path="/hug-meter" element={<ProtectedRoute path="/hug-meter"><ErrorBoundary><HugMeter /></ErrorBoundary></ProtectedRoute>} />
           <Route path="/kiss-wall" element={<ProtectedRoute path="/kiss-wall"><ErrorBoundary><KissWall /></ErrorBoundary></ProtectedRoute>} />
           <Route path="/memory-lane" element={<ProtectedRoute path="/memory-lane"><MemoryLane /></ProtectedRoute>} />
+          <Route path="/the-constellation" element={<ProtectedRoute path="/the-constellation"><TheConstellation /></ProtectedRoute>} />
           <Route path="/test-3d" element={<ErrorBoundary><Test3D /></ErrorBoundary>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
