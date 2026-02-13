@@ -9,8 +9,10 @@
 @layer base {
   :root {
     /* Core palette - warm rose tones */
-    --background: 355 100% 97%; /* Soft pink cream */
-    --foreground: 220 14% 25%; /* Soft charcoal */
+    --background: 355 100% 97%;
+    /* Soft pink cream */
+    --foreground: 220 14% 25%;
+    /* Soft charcoal */
 
     --card: 0 0% 100%;
     --card-foreground: 220 14% 25%;
@@ -19,7 +21,8 @@
     --popover-foreground: 220 14% 25%;
 
     /* Rose primary - the heart of our theme */
-    --primary: 347 77% 62%; /* Rose-500 */
+    --primary: 347 77% 62%;
+    /* Rose-500 */
     --primary-foreground: 0 0% 100%;
 
     /* Warm secondary */
@@ -115,7 +118,9 @@
     font-family: 'Inter', sans-serif;
   }
 
-  h1, h2, h3 {
+  h1,
+  h2,
+  h3 {
     font-family: 'Crimson Pro', serif;
   }
 }
@@ -131,10 +136,12 @@
 
   .floating-heart {
     animation: float 6s ease-in-out infinite;
+    will-change: transform, opacity;
   }
 
   .pulse-glow {
     animation: pulse-glow 2s ease-in-out infinite;
+    will-change: transform, box-shadow;
   }
 
   .love-counter {
@@ -149,28 +156,36 @@
 }
 
 @keyframes float {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0px) rotate(0deg);
   }
+
   25% {
     transform: translateY(-10px) rotate(2deg);
   }
+
   50% {
     transform: translateY(-5px) rotate(-1deg);
   }
+
   75% {
     transform: translateY(-15px) rotate(1deg);
   }
 }
 
 @keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 20px hsl(347 77% 62% / 0.4), 0 0 40px hsl(347 77% 62% / 0.2);
+
+  0%,
+  100% {
+    box-shadow: 0 0 15px hsl(347 77% 62% / 0.4);
     transform: scale(1);
   }
+
   50% {
-    box-shadow: 0 0 40px hsl(347 77% 62% / 0.6), 0 0 80px hsl(347 77% 62% / 0.3);
-    transform: scale(1.05);
+    box-shadow: 0 0 30px hsl(347 77% 62% / 0.6);
+    transform: scale(1.03);
   }
 }
 
@@ -179,6 +194,7 @@
     transform: translateY(-10px) rotate(0deg);
     opacity: 1;
   }
+
   100% {
     transform: translateY(100vh) rotate(720deg);
     opacity: 0;
@@ -190,9 +206,11 @@
     transform: scale(0) rotate(-10deg);
     opacity: 0;
   }
+
   50% {
     transform: scale(1.2) rotate(5deg);
   }
+
   100% {
     transform: scale(1) rotate(0deg);
     opacity: 1;
@@ -204,6 +222,7 @@
     transform: translateY(0) scale(1);
     opacity: 1;
   }
+
   100% {
     transform: translateY(-80px) scale(0.5);
     opacity: 0;

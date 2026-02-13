@@ -215,7 +215,7 @@ const ChocolateGame = () => {
       }`}>
       {extraSparklesUnlocked && (
         <div className="absolute inset-0 pointer-events-none opacity-40">
-          {[...Array(20)].map((_, i) => (
+          {[...Array(10)].map((_, i) => (
             <motion.div
               key={i}
               className="absolute text-amber-400"

@@ -4,15 +4,15 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Suspense, lazy } from 'react';
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
-import RoseGarden from "./pages/RoseGarden";
-import FriendshipContract from "./pages/FriendshipContract";
-import ChocolateGame from "./pages/ChocolateGame";
-import BuildABuddy from "./pages/BuildABuddy";
-import TimeCapsule from "./pages/TimeCapsule";
-import MemoryLane from "./pages/MemoryLane";
-import TheConstellation from "./pages/TheConstellation";
+const Index = lazy(() => import("./pages/Index"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const RoseGarden = lazy(() => import("./pages/RoseGarden"));
+const FriendshipContract = lazy(() => import("./pages/FriendshipContract"));
+const ChocolateGame = lazy(() => import("./pages/ChocolateGame"));
+const BuildABuddy = lazy(() => import("./pages/BuildABuddy"));
+const TimeCapsule = lazy(() => import("./pages/TimeCapsule"));
+const MemoryLane = lazy(() => import("./pages/MemoryLane"));
+const TheConstellation = lazy(() => import("./pages/TheConstellation"));
 
 // Lazy load 3D components to prevent global crash
 const HugMeter = lazy(() => import("./pages/HugMeter"));

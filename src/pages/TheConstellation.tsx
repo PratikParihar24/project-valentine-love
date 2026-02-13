@@ -29,7 +29,7 @@ const starMap: Star[] = [
 ];
 
 const RoseNebula = () => {
-    const particles = useMemo(() => Array.from({ length: 40 }).map((_, i) => ({
+    const particles = useMemo(() => Array.from({ length: 15 }).map((_, i) => ({
         id: i,
         size: Math.random() * 400 + 200,
         top: Math.random() * 100,
@@ -43,7 +43,7 @@ const RoseNebula = () => {
             {particles.map((p) => (
                 <motion.div
                     key={p.id}
-                    className="absolute rounded-full blur-[100px]"
+                    className="absolute rounded-full blur-[60px]"
                     style={{
                         width: p.size,
                         height: p.size,
@@ -69,7 +69,7 @@ const RoseNebula = () => {
 };
 
 const TwinklingStars = () => {
-    const stars = useMemo(() => Array.from({ length: 100 }).map((_, i) => ({
+    const stars = useMemo(() => Array.from({ length: 50 }).map((_, i) => ({
         id: i,
         size: Math.random() * 2 + 1,
         top: Math.random() * 100,
@@ -316,7 +316,7 @@ const TheConstellation = () => {
                     >
                         {/* Immersive Bokeh Background */}
                         <div className="absolute inset-0 z-0">
-                            {Array.from({ length: 20 }).map((_, i) => (
+                            {Array.from({ length: 12 }).map((_, i) => (
                                 <motion.div
                                     key={i}
                                     className="absolute rounded-full bg-primary/20 blur-[60px]"

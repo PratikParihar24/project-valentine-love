@@ -89,7 +89,10 @@ const RoseGarden = () => {
       swayDelay: Math.random() * 2,
     };
 
-    setFlowers((prev) => [...prev, newFlower]);
+    setFlowers((prev) => {
+      const next = [...prev, newFlower];
+      return next.length > 100 ? next.slice(next.length - 100) : next;
+    });
   }, []);
 
   const clearGarden = () => {
@@ -184,13 +187,13 @@ const RoseGarden = () => {
               }}
               exit={{ scale: 0, opacity: 0 }}
               transition={{
-                scale: { type: 'spring', stiffness: 300, damping: 15 },
+                scale: { type: 'spring', stiffness: 200, damping: 20 },
                 opacity: { duration: 0.3 },
                 rotate: {
                   repeat: Infinity,
                   duration: flower.swayDuration,
                   delay: flower.swayDelay,
-                  ease: "easeInOut"
+                  ease: "linear"
                 }
               }}
               onClick={(e) => {
